@@ -37,7 +37,7 @@ module.exports = {
 
             const user = checkAuth(context)
 
-            if(args.body.trime() === '')
+            if(body.trim() === '')
                 throw new UserInputError('Body must not be empty')
             
             const newPost = new Post()
@@ -58,6 +58,9 @@ module.exports = {
             // })
 
             const post  = await newPost.save()
+            context.pubsub.publish('NEW_POST', {
+                newPost: post
+            })
             return post
         },
 
@@ -77,5 +80,13 @@ module.exports = {
                 throw new Error(error)
             } 
         }
+    },
+
+    Subscription:{
+        newPost:{
+            subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('NEW_POST')
+        }
     }
+
+
 }
